@@ -3,7 +3,6 @@
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import { FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
 import { Pencil } from "lucide-react";
@@ -12,21 +11,20 @@ import { useState } from "react";
 import { useForm, FormProvider } from "react-hook-form";
 import toast from "react-hot-toast";
 import { cn } from "@/lib/utils";
-import { Textarea } from "@/components/ui/textarea";
 import { Course } from "@prisma/client";
 import { Combobox } from "@/components/ui/combobox";
 
 interface CategoryFormProps {
-  initialData: Course;   
-    courseId: string;
-    options:{label:string; value: string;}[];  };
- 
+  initialData: Course;
+  courseId: string;
+  options: { label: string; value: string }[];
+}
 
 const formSchema = z.object({
- categoryId : z.string().min(1), 
+  categoryId: z.string().min(1),
 });
 
-export const CategoryForm = ({ initialData, courseId ,options }: CategoryFormProps) => {
+export const CategoryForm = ({ initialData, courseId, options }: CategoryFormProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const router = useRouter();
 
@@ -55,7 +53,7 @@ export const CategoryForm = ({ initialData, courseId ,options }: CategoryFormPro
     }
   };
 
-  const selectedOption = options.find((option)=> option.value === initialData.categoryId)
+  const selectedOption = options.find((option) => option.value === initialData.categoryId);
 
   return (
     <div className="mt-6 border bg-slate-100 rounded-md p-4">
@@ -71,14 +69,13 @@ export const CategoryForm = ({ initialData, courseId ,options }: CategoryFormPro
         </Button>
       </div>
 
-      {/* Display description or a fallback message */}
+      {/* Display category or fallback message */}
       {!isEditing && (
         <p className={cn("text-sm mt-2", !initialData.categoryId && "text-slate-500 italic")}>
-          {selectedOption?.label|| "No Category available for this course."}
+          {selectedOption?.label || "No Category available for this course."}
         </p>
       )}
 
-      {/* Edit form for description */}
       {isEditing && (
         <FormProvider {...formMethods}>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 mt-4">
@@ -88,9 +85,11 @@ export const CategoryForm = ({ initialData, courseId ,options }: CategoryFormPro
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
-                    <Combobox 
-                    options={...options}
-                    {...field} />
+                    <Combobox
+                      value={field.value} // Bind value to form state
+                      onChange={(value) => field.onChange(value)} // Bind onChange to react-hook-form
+                      options={options} // Pass options to Combobox
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

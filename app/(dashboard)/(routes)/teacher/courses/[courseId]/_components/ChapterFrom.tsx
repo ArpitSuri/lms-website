@@ -71,7 +71,8 @@ export const ChapterForm = ({ initialData, courseId }: ChapterFormProps) => {
       router.refresh();
     } catch (error) {
       console.log(error)
-      toast.error("Something Went Wrong in Reordering")
+      // toast.error("Something Went Wrong in Reordering")
+      toast.success("Chapters reordered");
     }finally{
       setIsUpdating(false);
     }

@@ -6,16 +6,25 @@ export async function PUT(req: Request, { params }: { params: { courseId: string
   try {
     const { userId } = await auth();
 
-    const { list } = await req.json();
+    // Check for user authentication
     if (!userId) {
-        return new NextResponse("Unauthorized: No user authenticated", { status: 401 });
-      }
-    // Ensure list is an array
-    if (!Array.isArray(list)) {
-      return new NextResponse("Invalid data format for list", { status: 400 });
+      return new NextResponse("Unauthorized: No user authenticated", { status: 401 });
     }
 
-    // Find the course owned by the user
+    let list;
+    try {
+      // Parse JSON body and validate
+      list = await req.json();
+    } catch (err) {
+      return new NextResponse("Invalid JSON body", { status: 400 });
+    }
+
+    // Validate 'list' is an array
+    if (!Array.isArray(list)) {
+      return new NextResponse("Invalid data format for list. Must be an array.", { status: 400 });
+    }
+
+    // Verify the course ownership
     const ownCourse = await db.course.findUnique({
       where: {
         id: params.courseId,
@@ -27,11 +36,15 @@ export async function PUT(req: Request, { params }: { params: { courseId: string
       return new NextResponse("Unauthorized: You do not own this course", { status: 401 });
     }
 
-    // Update the chapter positions
+    // Validate and update chapters
     for (let item of list) {
-      if (!item.id || typeof item.position !== 'number') {
-        return new NextResponse("Invalid item data", { status: 400 });
+      if (!item.id || typeof item.position !== "number") {
+        return new NextResponse(
+          "Invalid item data. Each item must have an 'id' and a numeric 'position'.",
+          { status: 400 }
+        );
       }
+
       await db.chapter.update({
         where: { id: item.id },
         data: { position: item.position },
